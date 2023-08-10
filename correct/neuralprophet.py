@@ -25,7 +25,7 @@ m.set_plotting_backend("plotly")
 # Fit the model on the dataset (this might take a bit)
 metrics = m.fit(df)
 # Create a new dataframe reaching 365 into the future for our forecast, n_historic_predictions also shows historic data
-df_future = m.make_future_dataframe(df, n_historic_predictions=True, periods=30)
+df_future = m.make_future_dataframe(df, n_historic_predictions=True, periods=365)
 
 # Predict the future
 forecast = m.predict(df_future)
