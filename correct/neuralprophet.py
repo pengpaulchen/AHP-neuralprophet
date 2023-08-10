@@ -13,7 +13,7 @@ plt = df.plot(x="ds", y="y", figsize=(15, 5))
 # Disable logging messages unless there is an error
 set_log_level("ERROR")
 
-# Create a NeuralProphet model with default parameters
+# Create a NeuralProphet model wi../......././+++++----+++------++++++++------+----th default parameters
 m = NeuralProphet( n_forecasts=5, # 预测天数
     n_lags=7,   # 使用过去14天数据
     loss_func='mse', # 使用mse损失

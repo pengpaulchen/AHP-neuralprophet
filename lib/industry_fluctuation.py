@@ -28,10 +28,11 @@ class TextSimilarity:
         return industry_match
 
 class PriceCalculation:
-    def __init__(self, filename1, filename2):
+    def __init__(self, filename1, filename2,alpha):
         self.filename1 = filename1
         self.filename2 = filename2
-        self.pricing = evc.DynamicExcelPricing(self.filename1, alpha=0.4)
+        self.alpha=alpha
+        self.pricing = evc.DynamicExcelPricing(self.filename1, self.alpha)
         self.final_values = []  # 新增列表存储结果
         self.text_similarity = TextSimilarity(industry_data='industry_data.txt')
 

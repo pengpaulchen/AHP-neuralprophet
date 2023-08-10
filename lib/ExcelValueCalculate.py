@@ -6,7 +6,8 @@ import openpyxl
 
 
 class DynamicExcelPricing:
-    def __init__(self, excel_file, alpha=1.0, beta=10):
+    def __init__(self, excel_file, alpha=0.25, beta=100):
+        self.last_price = 0
         self.excel_file = excel_file
         self.alpha = alpha
         self.beta = beta
@@ -49,7 +50,7 @@ class DynamicExcelPricing:
 
         # 更新单元格数量
         if self.cell_count==0:
-            self.threshold = np.random.randint(low=5000, high=100000)  # 阈值，即单元格数量大于该值时开始增加文件大小
+            self.threshold = np.random.randint(low=25000, high=100000)  # 阈值，即单元格数量大于该值时开始增加文件大小
 
 
         self.cell_count += new_rows * new_cols
@@ -63,6 +64,8 @@ class DynamicExcelPricing:
         # print("filesize", self.file_size)
 
     def get_price(self):
+        # 平滑系数
+        smooth_factor = 0.8
         # 计算价格
         total_info = self.calc_info()
         volume = self.n * self.m  # 行数x列数=体积
@@ -71,9 +74,10 @@ class DynamicExcelPricing:
         # 使用回归方程将文件大小映射到价格范围(0, 10000)
         size = self.file_size
         price = 1130.15 + 11.07 * (size ** 1) + 0.25 * (size ** 2)
-
         # 使用sigmoid函数将信息密度映射到价格范围(0, 10000)
         price = price * (1 - 1 / (1 + np.exp(-self.alpha * density)))/self.beta
+        price=self.last_price * smooth_factor + price * (1 - smooth_factor)
+        self.last_price=price
         return price
 
     def calc_info(self):
