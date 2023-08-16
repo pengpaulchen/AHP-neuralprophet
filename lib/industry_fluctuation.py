@@ -34,7 +34,7 @@ class PriceCalculation:
         self.alpha=alpha
         self.pricing = evc.DynamicExcelPricing(self.filename1, self.alpha)
         self.final_values = []  # 新增列表存储结果
-        self.text_similarity = TextSimilarity(industry_data='industry_data.txt')
+        self.text_similarity = TextSimilarity(industry_data='./lib/industry_data.txt')
 
     def weight(self):
         data_analysis = ahp.DataAnalysis(self.filename2)

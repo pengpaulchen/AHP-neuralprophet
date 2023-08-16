@@ -14,8 +14,8 @@ plt = df.plot(x="ds", y="y", figsize=(15, 5))
 set_log_level("ERROR")
 
 # Create a NeuralProphet model wi../......././+++++----+++------++++++++------+----th default parameters
-m = NeuralProphet( n_forecasts=5, # 预测天数
-    n_lags=7,   # 使用过去14天数据
+m = NeuralProphet( n_forecasts=30, # 预测天数
+    n_lags=30,   # 使用过去14天数据
     loss_func='mse', # 使用mse损失
     epochs=200 # 训练50个epoch
  )
@@ -29,6 +29,7 @@ df_future = m.make_future_dataframe(df, n_historic_predictions=True, periods=365
 
 # Predict the future
 forecast = m.predict(df_future)
+print(forecast)
 
 # Visualize the forecast
 m.plot(forecast).show()

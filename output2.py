@@ -6,7 +6,7 @@ import datetime
 def main():
     PC = PriceCalculation('lib/有色金属测试数据.xlsx', 'lib/测试数据.csv',0.32)
     PC.weight()
-    for i in range(366):
+    for i in range(400):
         finalValue = PC.calculate()
         PC.update_data()
         if i == 0:
@@ -27,7 +27,7 @@ def correct():
     df = pd.read_csv("./correct/final_values.csv")
     forecast = PriceForecast(df)
     forecast_data = forecast.forecast()
-    forecast.print_forecast_points(forecast_data,20)
+    forecast.print_forecast_points(forecast_data)
 if __name__ == "__main__":
     # main()
     correct()

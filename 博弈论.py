@@ -1,89 +1,104 @@
 import random
-from lib import AHPCalculate as ahp, ExcelValueCalculate as evc
+import matplotlib.pyplot as plt
+import pandas as pd
 
-# 调用你的代码获取参数
-pricing = evc.DynamicExcelPricing('lib/有色金属测试数据.xlsx', alpha=0.3)
-base_price = pricing.get_price()
+# 读取final_value序列
+final_df = pd.read_csv('final_values.csv')
 
-data_analysis = ahp.DataAnalysis('lib/测试数据.csv')
-data_analysis.read_data()
-w_3rd = data_analysis.calculate_3rd_weights()
-w_2nd = data_analysis.calculate_2nd_weights(w_3rd)
-w_1st = data_analysis.calculate_1st_weights(w_2nd)
-impact_factor = (w_1st[0] + w_1st[2]) / w_1st[1]
+# 存储结果
+supplier_profits = []
+demander_profits = []
 
-VALUE = base_price * impact_factor  # 数据价值
-
-# 定义参数
-ACCURATE_PROB = 0.8  # 数据供应方提供准确数据的概率
-INACCURATE_PROB = 0.2  # 数据供应方提供不准确数据的概率
-BUY_PROB = 0.7  # 数据需求方购买数据的概率
-
-COST_ACCURATE = w_1st[0]*base_price # 提供准确数据的成本
-COST_INACCURATE = w_1st[0]*base_price*0.2  # 提供不准确数据的成本
-PENALTY =  5*base_price  # 提供不准确数据的惩罚，假一赔五
+# 参数设置
+COST_ACCURATE = 8
+COST_INACCURATE = 5
+PENALTY = 20
 
 
-# 模拟数据供应方选择
+# 数据供应方随机选择概率
+def supplier_prob():
+    return random.uniform(0.6, 0.9)
 
 
+# 数据需求方随机选择概率
+def demander_prob():
+    return random.uniform(0.5, 1)
+
+
+# 数据供应方选择
+def supplier_choice(prob):
+    r = random.random()
+    if r < prob:
+        return 'accurate'
+    else:
+        return 'inaccurate'
+
+
+# 数据需求方选择
+def demander_choice(prob):
+    r = random.random()
+    if r < prob:
+        return 'buy'
+    else:
+        return 'not_buy'
+
+# 单次模拟
 def one_trade():
-    def supplier_choice():
-        choice = random.random()
-        if choice < ACCURATE_PROB:
-            return 'accurate'
-        else:
-            return 'inaccurate'
+    # 更新VALUE
+    global VALUE
+    VALUE = final_df['y'].iloc[-1]
 
-    # 模拟数据需求方选择
-    def demander_choice():
-        choice = random.random()
-        if choice < BUY_PROB:
-            return 'buy'
-        else:
-            return 'not_buy'
+    prob_supply = supplier_prob()
+    prob_demand = demander_prob()
 
-    # 单次交易模拟
+    supplier = supplier_choice(prob_supply)
+    demander = demander_choice(prob_demand)
 
-    supplier_choice = supplier_choice() # 调用外部函数
-    demander_choice = demander_choice()
-
-    supplier_profit = 0
-    demander_profit = 0
-
-    if supplier_choice == 'accurate':
-        if demander_choice == 'buy':
-            demander_profit = VALUE
+    if supplier == 'accurate':
+        if demander == 'buy':
             supplier_profit = VALUE - COST_ACCURATE
+            demander_profit = VALUE
         else:
             supplier_profit = -COST_ACCURATE
+            demander_profit = 0
 
     else:
-        if demander_choice == 'buy':
-            demander_profit = -VALUE
+        if demander == 'buy':
             supplier_profit = VALUE - COST_INACCURATE - PENALTY
+            demander_profit = -VALUE
         else:
             supplier_profit = -COST_INACCURATE
+            demander_profit = 0
 
     return supplier_profit, demander_profit
 
 
-# 多次交易模拟
-def simulate(times):
-    total_supplier_profit = 0
-    total_demander_profit = 0
+# 多次模拟
+times = 100
+for i in range(times):
+    profit1, profit2 = one_trade()
 
-    for i in range(times):
-        supplier_profit, demander_profit = one_trade()
-        total_supplier_profit += supplier_profit
-        total_demander_profit += demander_profit
+    # 更新VALUE
+    VALUE = final_df['y'].iloc[-1]
 
-    average_supplier_profit = total_supplier_profit / times
-    average_demander_profit = total_demander_profit / times
+    supplier_profits.append(profit1)
+    demander_profits.append(profit2)
 
-    print(f'Supplier average profit: {average_supplier_profit}')
-    print(f'Demander average profit: {average_demander_profit}')
+# 绘图
+# 折线图
+plt.plot(supplier_profits, color='b', label='Supplier')
+plt.plot(demander_profits, color='r', label='Demander')
+plt.title("Profits Comparison")
+plt.xlabel("Round")
+plt.ylabel("Profit")
+plt.legend()
+plt.show()
 
-
-# 运行模拟
-simulate(10000)
+# 直方图
+plt.hist(supplier_profits, color='b', alpha=0.5, label='Supplier')
+plt.hist(demander_profits, color='r', alpha=0.5, label='Demander')
+plt.title("Profit Distribution")
+plt.xlabel("Profit")
+plt.ylabel("Frequency")
+plt.legend()
+plt.show()
